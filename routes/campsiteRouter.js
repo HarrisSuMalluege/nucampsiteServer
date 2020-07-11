@@ -6,7 +6,6 @@ This file is to handle get, put , post and delete (CRUD) endpoints
 const express = require('express');
 const bodyParser = require('body-parser');
 const Campsite = require('../models/campsite');
-const { response } = require('express');
 
 const campsiteRouter = express.Router();
 

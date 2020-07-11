@@ -1,6 +1,7 @@
 /*
 2020-07-09
 This is to defined campsite's schemas and the model for all documents in our databases campsites collection
+By: harris.su.malluege@gmail.com
 */
 
 const mongoose = require('mongoose');
@@ -9,8 +10,6 @@ const Schema = mongoose.Schema; // Making a shorthand instead of mongoose.Schema
 // To require mongoose-currency from the library
 require('mongoose-currency').loadType(mongoose);
 const Currency = mongoose.Types.Currency;
-
-
 
 // Creating comment Schema (subdocuments).
 const commentSchema = new Schema({
@@ -69,5 +68,5 @@ const campsiteSchema = new Schema({
 // Using the Schema to create a campsite model.
 const Campsite = mongoose.model("Campsite", campsiteSchema);
 
-// exporting the model
+// Exporting the model
 module.exports = Campsite;
