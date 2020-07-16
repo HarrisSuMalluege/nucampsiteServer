@@ -23,7 +23,7 @@ const promotionSchema = new Schema({
         required: true
     },
     featured: {
-        trye: Boolean,
+        type: Boolean,
         default: false
     },
     description: {

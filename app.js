@@ -32,7 +32,47 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+// using singed cookie, to provide the cookie parser with a secret key as an argument 
+app.use(cookieParser('12345-67890-09876-54321'));
+
+function auth(req, res, next) {
+  // console.log(req.headers);
+  // To use signedCookies to identify whether a user use cookie or not 
+  if(!req.signedCookies.user) {
+    const authHeader = req.headers.authorization;
+    // Check for basic auth header
+    if (!authHeader) {
+      const err = new Error('You are not authenticatied!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      return next(err);
+    }
+    // Verify auth credentials
+    const auth = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+    const user = auth[0];
+    const pass = auth[1];
+    if (user === 'admin' && pass === 'password') {
+      res.cookie('user', 'admin', {signed: true});
+      return next(); //authorized user
+    } else {
+      const err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticated', 'Basic');
+      err.status = 401;
+      return next(err);
+    }
+  } else {
+    if (req.signedCookies.user === 'admin') {
+      return next();
+    } else {
+       const err = new Error('You are not authenticated!');
+       res.status = 401;
+       return next(err);
+    }
+  }
+}
+
+app.use(auth);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
