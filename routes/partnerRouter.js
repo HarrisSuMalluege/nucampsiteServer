@@ -7,7 +7,7 @@ By: harris.su.malluege@gmail.com
 const express = require("express");
 const bodyParser = require("body-parser");
 const Partner = require('../models/partner');
-
+const authenticate = require('../authenticate');
 
 const partnerRouter = express.Router();
 
@@ -24,7 +24,7 @@ partnerRouter.route("/")
     .catch( err => next(err));
   })
   // Use body-parser to handle user create request
-  .post((req, res, next) => {
+  .post(authenticate.verifyUser, (req, res, next) => {
     Partner.create(req.body)
     .then( partner => {
       console.log('Partner Created', partner);
@@ -36,13 +36,13 @@ partnerRouter.route("/")
   })
 
   // To handle user updates request
-  .put((req, res) => {
+  .put(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end("PUT operation not supported on /partners.");
   })
 
   // To delete user request
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Partner.deleteMany()
     .then( response => {
       res.statusCode = 200,
@@ -67,7 +67,7 @@ partnerRouter.route("/:partnerId")
   })
 
   // To handle user's create by document's id
-  .post((req, res) => {
+  .post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(
       `POST operation not supported on /partners/${req.params.partnerId}`
@@ -75,7 +75,7 @@ partnerRouter.route("/:partnerId")
   })
 
   // To handle user's update by document's id
-  .put((req, res, next) => {
+  .put(authenticate.verifyUser, (req, res, next) => {
     Partner.findByIdAndUpdate(req.params.partnerId, {
       $set: req.body },
       { new: true })
@@ -88,7 +88,7 @@ partnerRouter.route("/:partnerId")
   })
 
   // To handle user's delete request
-  .delete((req, res, next) => {
+  .delete(authenticate.verifyUser, (req, res, next) => {
     Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
       res.statusCode = 200,

@@ -6,6 +6,7 @@ This file is to handle get, put , post and delete (CRUD) endpoints
 const express = require('express');
 const bodyParser = require('body-parser');
 const Campsite = require('../models/campsite');
+const authenticate = require('../authenticate');
 
 const campsiteRouter = express.Router();
 
@@ -29,7 +30,7 @@ campsiteRouter.route('/')
 })
 
 // Use body-parser to handle user create request
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
   Campsite.create(req.body)
   .then(campsite => {
     console.log('Campsite Created ', campsite);
@@ -41,13 +42,13 @@ campsiteRouter.route('/')
 })
 
 // To handle user updates
-.put((req, res) => {
+.put(authenticate.verifyUser,(req, res) => {
   res.statusCode = 403;
   res.end("PUT operation not supported on /campsites");
 })
 
 // To delete user request
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
   Campsite.deleteMany()
   .then(response => {
     res.statusCode = 200,
@@ -70,13 +71,13 @@ campsiteRouter.route('/:campsiteId')
 })
 
 // Use body-parser to handle user create request
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /campsites/${req.params.campsiteId}`);
 })
 
 // To handle user updates
-.put((req, res, next) => {
+.put(authenticate.verifyUser, (req, res, next) => {
   Campsite.findByIdAndUpdate(req.params.campsiteId, {
     $set: req.body },
     { new: true })
@@ -89,7 +90,7 @@ campsiteRouter.route('/:campsiteId')
 })
 
 // To delete user request
-.delete((req, res) => {
+.delete(authenticate.verifyUser, (req, res) => {
   Campsite.findByIdAndDelete(req.params.campsiteId)
   .then(response => {
     res.statusCode = 200,
@@ -119,7 +120,7 @@ campsiteRouter.route('/:campsiteId/comments')
 })
 
 // Use body-parser to handle user create request
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
   .then(campsite => {
     if(campsite) {
@@ -141,13 +142,13 @@ campsiteRouter.route('/:campsiteId/comments')
 })
 
 // To handle user updates
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
   res.statusCode = 403;
   res.end(`PUT operation not supported on /campsites/${req.params.campsiteId}/comments`);
 })
 
 // Removing comments
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
     .then((campsite) => {
       if (campsite) {
@@ -193,13 +194,13 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
 })
 
 // Use body-parser to handle user create request
-.post((req, res, next) => {
+.post(authenticate.verifyUser, (req, res, next) => {
   res.statusCode = 403;
   res.end(`POST operation not supported on /campsites/${req.params.campsiteId}/comments/${req.params.commentId}`);
 })
 
 // To handle user updates
-.put((req, res) => {
+.put(authenticate.verifyUser, (req, res) => {
   Campsite.findById(req.params.campsiteId)
   .then(campsite => {
     if (campsite && campsite.comments.id(req.params.commentId)) {
@@ -230,7 +231,7 @@ campsiteRouter.route('/:campsiteId/comments/:commentId')
 })
 
 // Removing comments ID
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
   .then(campsite => {
       if (campsite && campsite.comments.id(req.params.commentId)) {
