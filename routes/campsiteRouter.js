@@ -21,6 +21,8 @@ campsiteRouter.route('/')
 
 .get((req, res, next) => {
   Campsite.find()
+  // Using .populate() method to retureve for get requests 
+  .populate('comments.author')
   .then(campsites => {
     res.statusCode = 200;
     res.setHeader ('Content-Type', 'application/json');
@@ -62,12 +64,12 @@ campsiteRouter.route('/')
 campsiteRouter.route('/:campsiteId')
 .get((req, res, next) => {
   Campsite.findById(req.params.campsiteId)
-  .then(campsite => {
-    res.statusCode = 200,
-    res.setHeader('Content-Type', 'application/json');
-    res.json(campsite);
-  })
-  .catch(err => next(err));
+    .populate("comments.author")
+    .then((campsite) => {
+      (res.statusCode = 200), res.setHeader("Content-Type", "application/json");
+      res.json(campsite);
+    })
+    .catch((err) => next(err));
 })
 
 // Use body-parser to handle user create request
@@ -105,6 +107,8 @@ campsiteRouter.route('/:campsiteId')
 campsiteRouter.route('/:campsiteId/comments')
 .get((req, res, next) => {
   Campsite.findById(req.params.campsiteId)
+  // Using .populate() method to retureve for get requests 
+  .populate('comments.author')
   .then(campsite => {
     if(campsite) {
       res.statusCode = 200;
@@ -124,6 +128,7 @@ campsiteRouter.route('/:campsiteId/comments')
   Campsite.findById(req.params.campsiteId)
   .then(campsite => {
     if(campsite) {
+      req.body.author = req.user._id; // To update the user id when the author submitted
       campsite.comments.push(req.body);
       campsite.save()
       .then( campsite => {
@@ -175,6 +180,8 @@ campsiteRouter.route('/:campsiteId/comments')
 campsiteRouter.route('/:campsiteId/comments/:commentId')
 .get((req, res, next) => {
   Campsite.findById(req.params.campsiteId)
+  // Using .populate() method to retureve for get requests 
+  .populate('comments.author')
   .then(campsite => {
     if(campsite && campsite.comments.id(req.params.commentId)) {
       res.statusCode = 200;
