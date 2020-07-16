@@ -5,24 +5,19 @@ by: harris.su.malluege@gmail.com
 */
 
 const mongoose = require('mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
 const Schema = mongoose.Schema;
 
 // Create user schema
 const userSchema = new Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    password: {
-        type: String,
-        required: true,
-    },
     admin: {
         type: Boolean,
         default: false
     }
 });
+
+// To use plugin method to plug in user schema
+userSchema.plugin(passportLocalMongoose);
 
 // Creating a module and exporting
 module.exports = mongoose.model('User', userSchema);
