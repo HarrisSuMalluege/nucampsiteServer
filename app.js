@@ -35,15 +35,13 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// using singed cookie, to provide the cookie parser with a secret key as an argument 
-// app.use(cookieParser('12345-67890-09876-54321'));
-
 
 app.use(passport.initialize());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
+// to add authentication
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/campsites', campsiteRouter);
