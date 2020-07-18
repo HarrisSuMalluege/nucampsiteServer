@@ -24,7 +24,7 @@ partnerRouter.route("/")
     .catch( err => next(err));
   })
   // Use body-parser to handle user create request
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.create(req.body)
     .then( partner => {
       console.log('Partner Created', partner);
@@ -42,7 +42,7 @@ partnerRouter.route("/")
   })
 
   // To delete user request
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.deleteMany()
     .then( response => {
       res.statusCode = 200,
@@ -75,7 +75,7 @@ partnerRouter.route("/:partnerId")
   })
 
   // To handle user's update by document's id
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.findByIdAndUpdate(req.params.partnerId, {
       $set: req.body },
       { new: true })
@@ -88,7 +88,7 @@ partnerRouter.route("/:partnerId")
   })
 
   // To handle user's delete request
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Partner.findByIdAndDelete(req.params.partnerId)
     .then(response => {
       res.statusCode = 200,

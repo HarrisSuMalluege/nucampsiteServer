@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "init": "mkdir ./data && mkdir ./data/db",
+    "start": "node ./bin/www",
+    "mongo": "mongod --dbpath=./data/db --bind_ip 127.0.0.1"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",

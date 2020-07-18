@@ -27,7 +27,7 @@ promotionRouter.route("/")
   })
 
   // To handle user create request
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.create(req.body)
     .then( promotion => {
       res.statusCode = 200,
@@ -44,7 +44,7 @@ promotionRouter.route("/")
   })
 
   // To delete user request
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.deleteMany()
     .then(response => {
       res.statusCode = 200,
@@ -78,7 +78,7 @@ promotionRouter.route("/:promotionId")
   })
 
    // To handle user's update by document's id
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.findByIdAndUpdate(req.params.promotionId, {
       $set: req.body }, 
       {new: true})
@@ -91,7 +91,7 @@ promotionRouter.route("/:promotionId")
   })
 
   // To handle user's delete request
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Promotion.findByIdAndDelete(req.params.promotionId)
     .then(response => {
       res.statusCode = 200,

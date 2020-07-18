@@ -1,7 +1,6 @@
 /*
 2020-07-16
-This file is to create the json web token authorization
-by: harris.su.malluege@gmail.com
+
 */
 
 const passport = require('passport');
@@ -36,7 +35,6 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 // setting the secret key
 opts.secretOrKey = config.secretKey;
 
-// setting json web token strategy for passport
 exports.jwtPassport = passport.use(
     new JwtStrategy(
         opts, (jwt_payload, done) => {
@@ -44,12 +42,12 @@ exports.jwtPassport = passport.use(
             // search user id in database
             User.findOne({_id: jwt_payload._id}, (err, user) => {
                 if (err) {
-                    return done(err, false);    
+                    return done(err, false);    // throughtout the error and no user found
                 } else if (user) {
                     return done(null, user);    // none error, and return the user has found
                 }
                 else {
-                    return done(null, false); //null: none error; false: no user found
+                    return done(null, false); //null: no error; false: no user found
                 }
             });
         }
@@ -57,16 +55,4 @@ exports.jwtPassport = passport.use(
 );
 
 // export the verifyUser module with passport has been encrypted 
-exports.verifyUser = passport.authenticate('jwt', { session: false }); // jwt argument is to use jwt strategy, and the second argument session is false which means that there is no session.
-
-// export and create the verify admin middleware module
-exports.verifyAdmin = function (req, res, next) {
-  if (req.user.admin) {
-    next();
-    return;
-  } else {
-    const err = new Error("You are not authrized to perform this operation!");
-    err.status = 403;
-    return next(err);
-  }
-};
+exports.verifyUser = passport.authenticate('jwt', { session: false });
