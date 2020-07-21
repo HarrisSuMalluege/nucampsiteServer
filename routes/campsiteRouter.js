@@ -7,19 +7,16 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Campsite = require('../models/campsite');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const campsiteRouter = express.Router();
 
 campsiteRouter.use(bodyParser.json());
 
 campsiteRouter.route('/')
-// .all((req, res, next) => {
-//   res.statusCode = 200;
-//   res.setHeader("Content-Type", "text/plain");
-//   next(); // the next function is passed control of the application routing to the next relevant routing method after this one, otherwise it would just stop here and not go any further
-// })
-
-.get((req, res, next) => {
+// Set up an options routing method to handle a pre-filght request
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
   Campsite.find()
   // Using .populate() method to retureve for get requests 
   .populate('comments.author')
@@ -32,7 +29,7 @@ campsiteRouter.route('/')
 })
 
 // Use body-parser to handle user create request
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   Campsite.create(req.body)
   .then(campsite => {
     console.log('Campsite Created ', campsite);
@@ -44,13 +41,13 @@ campsiteRouter.route('/')
 })
 
 // To handle user updates
-.put(authenticate.verifyUser,(req, res) => {
+.put(cors.corsWithOptions, authenticate.verifyUser,authenticate.verifyAdmin, (req, res) => {
   res.statusCode = 403;
   res.end("PUT operation not supported on /campsites");
 })
 
 // To delete user request
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   Campsite.deleteMany()
   .then(response => {
     res.statusCode = 200,
@@ -60,9 +57,11 @@ campsiteRouter.route('/')
   .catch(err => next(err));
 });
 
-// Workshop assignment task 1
+// campsiteId route
 campsiteRouter.route('/:campsiteId')
-.get((req, res, next) => {
+// Set up an options routing method to handle a pre-filght request
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
     .populate("comments.author")
     .then((campsite) => {
@@ -73,13 +72,13 @@ campsiteRouter.route('/:campsiteId')
 })
 
 // Use body-parser to handle user create request
-.post(authenticate.verifyUser, (req, res) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
     res.statusCode = 403;
     res.end(`POST operation not supported on /campsites/${req.params.campsiteId}`);
 })
 
 // To handle user updates
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   Campsite.findByIdAndUpdate(req.params.campsiteId, {
     $set: req.body },
     { new: true })
@@ -92,7 +91,7 @@ campsiteRouter.route('/:campsiteId')
 })
 
 // To delete user request
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   Campsite.findByIdAndDelete(req.params.campsiteId)
   .then(response => {
     res.statusCode = 200,
@@ -105,7 +104,9 @@ campsiteRouter.route('/:campsiteId')
 
 // Handling comments
 campsiteRouter.route('/:campsiteId/comments')
-.get((req, res, next) => {
+// Set up an options routing method to handle a pre-filght request
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+.get(cors.cors, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
   // Using .populate() method to retureve for get requests 
   .populate('comments.author')
@@ -124,7 +125,7 @@ campsiteRouter.route('/:campsiteId/comments')
 })
 
 // Use body-parser to handle user create request
-.post(authenticate.verifyUser, (req, res, next) => {
+.post(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
   .then(campsite => {
     if(campsite) {
@@ -147,13 +148,13 @@ campsiteRouter.route('/:campsiteId/comments')
 })
 
 // To handle user updates
-.put(authenticate.verifyUser, (req, res) => {
+.put(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
   res.statusCode = 403;
   res.end(`PUT operation not supported on /campsites/${req.params.campsiteId}/comments`);
 })
 
 // Removing comments
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+.delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   Campsite.findById(req.params.campsiteId)
     .then((campsite) => {
       if (campsite) {
@@ -179,7 +180,8 @@ campsiteRouter.route('/:campsiteId/comments')
 // Handling Comments ID request
 campsiteRouter
   .route("/:campsiteId/comments/:commentId")
-  .get((req, res, next) => {
+  .options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+  .get(cors.cors, (req, res, next) => {
     Campsite.findById(req.params.campsiteId)
       // Using .populate() method to retureve for get requests
       .populate("comments.author")
@@ -202,7 +204,7 @@ campsiteRouter
   })
 
   // Use body-parser to handle user create request
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     res.statusCode = 403;
     res.end(
       `POST operation not supported on /campsites/${req.params.campsiteId}/comments/${req.params.commentId}`
@@ -210,15 +212,20 @@ campsiteRouter
   })
 
   // To handle user updates
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Campsite.findById(req.params.campsiteId)
       .then((campsite) => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
           console.log(campsite.comments.id(req.params.commentId).author);
           console.log(req.user._id);
-          if ( req.user._id.equals( campsite.comments.id(req.params.commentId).author )) {
+          if (
+            req.user._id.equals(
+              campsite.comments.id(req.params.commentId).author
+            )
+          ) {
             if (req.body.rating) {
-              campsite.comments.id(req.params.commentId).rating = req.body.rating;
+              campsite.comments.id(req.params.commentId).rating =
+                req.body.rating;
             }
             if (req.body.text) {
               campsite.comments.id(req.params.commentId).text = req.body.text;
@@ -250,25 +257,29 @@ campsiteRouter
   })
 
   // Removing comments ID
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Campsite.findById(req.params.campsiteId)
       .then((campsite) => {
         if (campsite && campsite.comments.id(req.params.commentId)) {
-          if ( req.user._id.equals( campsite.comments.id(req.params.commentId).author )) {
-          campsite.comments.id(req.params.commentId).remove();
-          campsite
-            .save()
-            .then((campsite) => {
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(campsite);
-            })
-            .catch((err) => next(err));
+          if (
+            req.user._id.equals(
+              campsite.comments.id(req.params.commentId).author
+            )
+          ) {
+            campsite.comments.id(req.params.commentId).remove();
+            campsite
+              .save()
+              .then((campsite) => {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.json(campsite);
+              })
+              .catch((err) => next(err));
           } else {
             const err = new Error("Sorry! User is not authrized!");
             err.status = 403;
             return next(err);
-          } 
+          }
         } else if (!campsite) {
           err = new Error(`Campsite ${req.params.campsiteId} not found`);
           err.status = 404;
