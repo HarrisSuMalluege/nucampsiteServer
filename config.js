@@ -8,5 +8,9 @@ by: harris.su.malluege@gmail.com
 // Export the secret key for using to sign the JSON web token
 module.exports = {
     'secretKey': '12345-67890-09876-543212',
-    'mongoUrl': 'mongodb://localhost:27017/nucampsite'
+    'mongoUrl': 'mongodb://localhost:27017/nucampsite',
+    'facebook': {
+        clientId: '701196114064168',
+        clientSecret: '6bcde005ef93dc1612a0d9712992e74b'
+    }
 }
