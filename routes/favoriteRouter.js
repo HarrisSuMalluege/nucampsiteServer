@@ -51,9 +51,9 @@ favoriteRouter
                 })
                 .catch((err) => next(err));
             } else {
-              err = new Error(`That campsite ${req.params.campsiteId} has already added favorites`);
-              err.status = 401;
-              return next(err);
+             const err = new Error('That campsite is already in the list of favorites!');
+             err.status = 401;
+             return next(err);
             }
           });
         } else if (!favorite) {
@@ -155,15 +155,15 @@ favoriteRouter
 
   /**
    * If there is a favorite document for the user, check if campsiteId from URL param is in its campsite array, then delete it
-   *
    */
+
   .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorite.findOne({ user: req.user._id })
       .then((favorite) => {
         if (favorite) {
           favorite.campsites.forEach((favoriteId) => {
-            if (favorite.campsites.includes(favoriteId._id)) {
-              favorite.campsites.remove(favoriteId._id);
+            if (favorite.campsites.includes(req.params.campsiteId)) {
+              favorite.campsites.remove(favoriteId);
             }
           });
           favorite
@@ -178,5 +178,6 @@ favoriteRouter
       })
       .catch((err) => next(err));
   });
+
 
 module.exports = favoriteRouter;
