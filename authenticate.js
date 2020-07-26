@@ -14,6 +14,10 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 // used to create, sign and verify tokens
 const jwt = require('jsonwebtoken');
 const FacebookTokenStrategy = require('passport-facebook-token');
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+// const GoogleStrategy = require("passport-google-oauth").OAuthStrategy;
+// const GoogleTokenStrategy = require('passport-google-token').Strategy;
+// const LinkedinTokenStrategy = require('passport-linkedin-token');
 
 // import the config secret key file
 const config = require('./config.js');
@@ -61,10 +65,9 @@ exports.jwtPassport = passport.use(
 exports.verifyUser = passport.authenticate('jwt', { session: false }); // jwt argument is to use jwt strategy, and the second argument session is false which means that there is no session.
 
 // export and create the verify admin middleware module
-exports.verifyAdmin = function (req, res, next) {
+exports.verifyAdmin = (req, res, next) => {
   if (req.user.admin) {
-    next();
-    return;
+    return next();
   } else {
     const err = new Error("You are not authrized to perform this operation!");
     err.status = 403;
@@ -75,11 +78,14 @@ exports.verifyAdmin = function (req, res, next) {
 // Set up Facebook authentication strategy
 exports.facebookPassport = passport.use(
     new FacebookTokenStrategy(
+        // setting configuration
         {
             clientID: config.facebook.clientId,
             clientSecret: config.facebook.clientSecret
         },
+        // setting verified callback function
         (accessToken, refreshToken, profile, done) => {
+            // check if any facebookid in our database
             User.findOne({facebookId: profile.id}, (err, user) => {
                 if (err) {
                     return done(err, false);
@@ -87,6 +93,7 @@ exports.facebookPassport = passport.use(
                 if (!err && user) {
                     return done(null, user);
                 } else {
+                    // to save user into local user document from user facebook profile information
                     user = new User({username: profile.displayName});
                     user.facebookId = profile.id;
                     user.firstname = profile.name.givenName;
@@ -103,3 +110,20 @@ exports.facebookPassport = passport.use(
         }
     )
 )
+
+// Set up Google Oauth authentication strategy
+exports.googlePassport = passport.use(
+    new GoogleStrategy(
+        {
+            clientID: config.google.clientId,
+            clientSecret: config.google.clientSecret,
+            callbackURL: 'https://localhost:3443/google/callback'
+        },
+        (accessToken, refreshToken, profile, done) => {
+            User.findOrCreate({ googleId: profile.id }, (err, user) => {
+                return done(null, profile);
+            });
+        }
+    )
+)
+

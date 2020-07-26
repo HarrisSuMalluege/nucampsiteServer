@@ -2,8 +2,6 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
-// const session = require('express-session');
-// const FileStore = require('session-file-store')(session); // A function returning another function, and it will immediately to call the second function
 const passport = require('passport');
 const config = require('./config');
 
@@ -13,6 +11,7 @@ const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 const uploadRouter = require('./routes/uploadRouter');
+const favoriteRouter = require('./routes/favoriteRouter');
 
 // Adding mongoose modules and initiallizing the enviroment
 const mongoose = require('mongoose');
@@ -59,6 +58,7 @@ app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
 app.use('/imageUpload', uploadRouter);
+app.use('/favorites', favoriteRouter);
 
 
 // catch 404 and forward to error handler

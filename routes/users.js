@@ -75,14 +75,44 @@ router.get('/logout', cors.corsWithOptions, (req, res, next) => {
   }
 });
 
+// Creating a new route endpoint for application to handle passing the access token from Facebook
 router.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
   if (req.user) {
     // Create a new user json web token
     const token = authenticate.getToken({_id: req.user._id});
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.json({success: true, token: token, status: 'You are successfully logged in!'});
+    res.json({success: true, token: token, status: 'You are successfully logged in!'}); // using .json to send the login information
   }
 })
+
+
+// Example protected and unprotected routes
+router.get('/', (req, res) => res.send('Example Home page!'))
+router.get('/failed', (req, res) => res.send('You Failed to log in!'))
+
+// Auth middleware that checks if the user is logged in
+const isLoggedIn = (req, res, next) => {
+    if (req.user) {
+        next();
+    } else {
+        res.sendStatus(401);
+    }
+}
+
+// In this route you can see that if the user is logged in u can acess his info in: req.user
+router.get('/good', isLoggedIn, (req, res) => res.send(`Welcome mr ${req.user.displayName}!`))
+
+// Creating a new route endpoint for application to handle passing the access token from Google
+router.get('/google/', passport.authenticate('google', {scope: ['profile', 'email']}))
+// router.get('/google', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
+
+// router.get('/google', passport.authenticate('google', {scope: ['profile', 'email']}))
+router.get('/google/callback', passport.authenticate('google', {failureRedirect: '/failed'}), (req, res) => {
+  res.statusCode = 200;
+  res.redirect('/good');
+});
+
+
 
 module.exports = router;

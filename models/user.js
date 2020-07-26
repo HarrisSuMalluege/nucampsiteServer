@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const Schema = mongoose.Schema;
 
-// Create user schema
+// Create user schema and facebookId schema to save user data
 const userSchema = new Schema({
     firstname: {
         type: String,
@@ -18,7 +18,8 @@ const userSchema = new Schema({
         type: String,
         default: ''
     },
-    facebookId: String,
+    facebookId: String, 
+    googleId: String,
     admin: {
         type: Boolean,
         default: false
