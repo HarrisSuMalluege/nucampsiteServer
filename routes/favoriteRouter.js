@@ -9,9 +9,7 @@ const bodyParser = require("body-parser");
 const Favorite = require("../models/favorite");
 const authenticate = require("../authenticate");
 const cors = require("./cors");
-const Campsite = require("../models/campsite");
-const campsiteRouter = require("./campsiteRouter");
-const { response } = require("express");
+
 
 //  Create the favoriteRouter
 const favoriteRouter = express.Router();
@@ -52,7 +50,7 @@ favoriteRouter
                 .catch((err) => next(err));
             } else {
              const err = new Error('That campsite is already in the list of favorites!');
-             err.status = 401;
+             err.status = 400;
              return next(err);
             }
           });
@@ -130,7 +128,7 @@ favoriteRouter
               const err = new Error(
                 `That campsite ${req.params.campsiteId} is already in the list of favorites!`
               );
-              err.status = 401;
+              err.status = 400;
               return next(err);
             }
           });
@@ -161,7 +159,7 @@ favoriteRouter
     Favorite.findOne({ user: req.user._id })
       .then((favorite) => {
         if (favorite) {
-          favorite.campsites.forEach((favoriteId) => {
+          favorite.campsites.forEach(favoriteId => {
             if (favorite.campsites.includes(req.params.campsiteId)) {
               favorite.campsites.remove(favoriteId);
             }
@@ -181,3 +179,4 @@ favoriteRouter
 
 
 module.exports = favoriteRouter;
+
